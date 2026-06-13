@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:latest
+    container_name: docmind_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - docmind_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docmind_app
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://db:27017/ai-doc-intel
+      - NODE_ENV=production
+      - CLIENT_URL=http://localhost:5000
+      - JWT_SECRET=prod_secret_access_key_docker_9283712
+      - JWT_REFRESH_SECRET=prod_secret_refresh_key_docker_8392182
+      - JWT_ACCESS_EXPIRATION=15m
+      - JWT_REFRESH_EXPIRATION=7d
+      # Fallback mode is active by default because keys are blank. Add actual values to enable OpenAI/Cloudinary
+      - CLOUDINARY_CLOUD_NAME=
+      - CLOUDINARY_API_KEY=
+      - CLOUDINARY_API_SECRET=
+      - OPENAI_API_KEY=
+      - PINECONE_API_KEY=
+      - PINECONE_ENVIRONMENT=
+      - PINECONE_INDEX=
+    depends_on:
+      - db
+    networks:
+      - docmind_network
+
+volumes:
+  mongodb_data:
+
+networks:
+  docmind_network:
+    driver: bridge

@@ -1,0 +1,12 @@
+{
+  "name": "ai-doc-intel-root",
+  "version": "1.0.0",
+  "description": "Root workspace runner for AI-Driven Document Intelligence System",
+  "scripts": {
+    "install-all": "npm install --prefix backend && npm install --prefix frontend",
+    "backend": "npm run dev --prefix backend",
+    "frontend": "npm run dev --prefix frontend",
+    "dev": "node -e \"const cp=require('child_process'); cp.spawn('npm', ['run', 'dev'], {cwd: './backend', stdio: 'inherit', shell: true}); cp.spawn('npm', ['run', 'dev'], {cwd: './frontend', stdio: 'inherit', shell: true});\""
+  },
+  "private": true
+}

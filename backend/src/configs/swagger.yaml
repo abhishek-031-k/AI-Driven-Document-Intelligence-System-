@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  title: AI-Driven Document Intelligence System API
+  version: 1.0.0
+  description: API Documentation for full-stack AI Powered document OCR, classification, summarization, semantic search, and RAG Q&A platform.
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fullName, email, password]
+              properties:
+                fullName:
+                  type: string
+                  example: Jane Doe
+                email:
+                  type: string
+                  example: jane@example.com
+                password:
+                  type: string
+                  example: securepassword123
+      responses:
+        201:
+          description: User registered successfully
+
+  /api/v1/auth/login:
+    post:
+      summary: Login user and retrieve JWT tokens
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: jane@example.com
+                password:
+                  type: string
+                  example: securepassword123
+      responses:
+        200:
+          description: Authentication successful
+
+  /api/v1/auth/logout:
+    post:
+      summary: Invalidate user refresh token and logout
+      tags: [Authentication]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Logged out successfully
+
+  /api/v1/auth/refresh-token:
+    post:
+      summary: Get new tokens using refresh token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        200:
+          description: Tokens refreshed
+
+  /api/v1/auth/forgot-password:
+    post:
+      summary: Request password reset token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  example: jane@example.com
+      responses:
+        200:
+          description: Password reset email generated
+
+  /api/v1/auth/reset-password/{token}:
+    post:
+      summary: Reset password with token
+      tags: [Authentication]
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  example: newsecurepass123
+      responses:
+        200:
+          description: Password updated successfully
+
+  /api/v1/auth/verify-email:
+    get:
+      summary: Confirm email verification token
+      tags: [Authentication]
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Email verified successfully
+
+  /api/v1/documents:
+    get:
+      summary: Get list of documents
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: List of documents retrieved
+
+  /api/v1/documents/upload:
+    post:
+      summary: Upload document (PDF, DOCX, TXT, images)
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                description:
+                  type: string
+      responses:
+        202:
+          description: Upload successful, processing started
+
+  /api/v1/documents/{id}:
+    get:
+      summary: Get document details by ID
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Document details retrieved
+    put:
+      summary: Update document tags, title, or category
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: Document updated
+    delete:
+      summary: Delete document and chunks
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Document deleted successfully
+
+  /api/v1/documents/summarize:
+    post:
+      summary: Get AI-generated summaries
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentId]
+              properties:
+                documentId:
+                  type: string
+      responses:
+        200:
+          description: Summaries retrieved
+
+  /api/v1/documents/question-answer:
+    post:
+      summary: Ask a question about a document (RAG)
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentId, question]
+              properties:
+                documentId:
+                  type: string
+                question:
+                  type: string
+                  example: What is the total invoice amount?
+      responses:
+        200:
+          description: Answer retrieved successfully
+
+  /api/v1/documents/search:
+    post:
+      summary: Semantic vector similarity search
+      tags: [Documents]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  example: financial earnings reports
+      responses:
+        200:
+          description: Similar documents found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
