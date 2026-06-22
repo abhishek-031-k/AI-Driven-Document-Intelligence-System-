@@ -11,7 +11,6 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Create HTTP Server
-//create HTTP server
 const server = http.createServer(app);
 
 // Initialize Socket.io
